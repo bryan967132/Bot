@@ -18,7 +18,7 @@ class Scanner:
         self.__i -= 1
     
     def __addError(self):
-        self.__errors.append(Error(f'Caracter \'{self.__buffer}\' no reconocido',self.__line,self.__column))
+        self.__errors.append(Error(f'Unrecognized Character: \'{self.__buffer}\'',self.__line,self.__column))
         self.__buffer = ''
         self.__status = 0
 
