@@ -39,4 +39,3 @@
 \<TEAMCONDITION\> ::= rw_LOCAL \| rw_VISITANTE \| rw_TOTAL
 \<TOPCONDITION\> ::= rw_SUPERIOR \| rw_INFERIOR
 \<FLAGS\> ::= flag_f string \| flag_n number \| flag_ji number \| flag_jf number \| ϵ \| \<FLAGS\>
-\<FLAGS1\> ::= flag_f string \| flag_n number \| flag_ji number \| flag_jf number \| ϵ \| \<FLAGS\>
