@@ -2,6 +2,10 @@ from Token import Token
 from Error import Error
 from prettytable import PrettyTable
 class Scanner:
+    def __init__(self):
+        self.__tokens_record = []
+        self.__errors_record = []
+    
     def __reset(self):
         self.__tokens = []
         self.__errors = []
@@ -12,12 +16,14 @@ class Scanner:
         self.__i = 0
     
     def __addToken(self,type):
+        self.__tokens_record.append(Token(self.__buffer,type,self.__line,self.__column))
         self.__tokens.append(Token(self.__buffer,type,self.__line,self.__column))
         self.__buffer = ''
         self.__status = 0
         self.__i -= 1
     
     def __addError(self):
+        self.__errors_record.append(Error(f'Unrecognized Character: \'{self.__buffer}\'',self.__line,self.__column))
         self.__errors.append(Error(f'Unrecognized Character: \'{self.__buffer}\'',self.__line,self.__column))
         self.__buffer = ''
         self.__status = 0
@@ -41,6 +47,18 @@ class Scanner:
     
     def getErrors(self) -> list:
         return self.__errors
+
+    def getTokensRecord(self) -> list:
+        return self.__tokens_record
+    
+    def getErrorsRecord(self) -> list:
+        return self.__errors_record
+    
+    def deleteTokensRecord(self):
+        self.__tokens_record = []
+
+    def deleteErrorsRecord(self):
+        self.__errors_record = []
     
     def __S0(self,character):
         if character.isalpha():
