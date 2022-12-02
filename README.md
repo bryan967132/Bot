@@ -22,6 +22,9 @@
 | More Than                           | Character '>'                                 | '>'                    | >                             |
 | Hyphen                                     | Character '-'                                 | '-'                    | -                             |
 
+# AFD
+<image src="Images/AFD_Bot.png" width="70%" height="70%" alt="AFD">
+
 # Context Free Grammar
 | Productions                              |
 | ----------------------------------------- |
