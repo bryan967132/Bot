@@ -1,3 +1,4 @@
+from Token import Token
 class Parser:  
     def __init__(self):
         self.__errors = []
@@ -6,7 +7,7 @@ class Parser:
         self.__errors.append(f'SYNTAX ERROR: It was obtained {obtained}, but it was expected {expected}')
         print(f'SYNTAX ERROR: It was obtained {obtained}, but it was expected {expected}')
     
-    def __popToken(self):
+    def __popToken(self) -> Token:
         try:
             return self.__tokens.pop(0)
         except:
