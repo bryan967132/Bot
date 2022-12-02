@@ -54,6 +54,12 @@ class Scanner:
     def getErrorsRecord(self) -> list:
         return self.__errors_record
     
+    def deleteTokensRecord(self):
+        self.__tokens_record = []
+
+    def deleteErrorsRecord(self):
+        self.__errors_record = []
+    
     def __S0(self,character):
         if character.isalpha():
             self.__status = 1
