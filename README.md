@@ -38,4 +38,8 @@
 \<SEASON\> ::= rw_TEMPORADA lessThan number hyphen number moreThan
 \<TEAMCONDITION\> ::= rw_LOCAL \| rw_VISITANTE \| rw_TOTAL
 \<TOPCONDITION\> ::= rw_SUPERIOR \| rw_INFERIOR
-\<FLAGS\> ::= flag_f string \<FLAGS\> \| flag_n number \<FLAGS\> \| flag_ji number \<FLAGS\> \| flag_jf number \<FLAGS\> \| 
+\<FLAGS\> ::= \<FLAGF\> \| \<FLAGJI\> \| \<FLAGJF\> \| \<FLAGN\> \| ϵ
+\<FLAGF\> ::= flag_f string \<FLAGS\>
+\<FLAGJI\> ::= flag_ji number \<FLAGS\>
+\<FLAGJF\> ::= flag_jf number \<FLAGS\>
+\<FLAGN\> ::= flag_n number \<FLAGS\>
