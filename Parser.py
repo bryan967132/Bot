@@ -33,7 +33,7 @@ class Parser:
             print('Command Accepted')
         else:
             self.__addError('RW_RESULTADO | RW_JORNADA | RW_GOLES | RW_TABLA | RW_PARTIDOS | RW_TOP | RW_ADIOS',token.type)
-    
+
     def __SCORE(self):
         token = self.__popToken()
         if not token:
@@ -55,7 +55,7 @@ class Parser:
                 self.__addError('RW_VS',token.type)
         else:
             self.__addError('TeamName',token.type)
-    
+
     def __MATCHDAY(self):
         token = self.__popToken()
         if not token:
@@ -66,7 +66,7 @@ class Parser:
                     print('Command Accepted')
         else:
             self.__addError('Number',token.type)
-    
+
     def __GOALS(self):
         token = self.__popToken()
         if not token:
@@ -82,12 +82,12 @@ class Parser:
                 self.__addError('TeamName',token.type)
         else:
             self.__addError('RW_TOTAL | RW_LOCAL | RW_VISITANTE','EOF',token.type)
-    
+
     def __STANDINGS(self):
         if self.__SEASON():
             if self.__FLAGS():
                 print('Command Accepted')
-    
+
     def __MATCHES(self):
         token = self.__popToken()
         if not token:
@@ -98,7 +98,7 @@ class Parser:
                     print('Command Accepted')
         else:
             self.__addError('TeamName',token.type)
-    
+
     def __TOP(self):
         token = self.__popToken()
         if not token:
@@ -109,7 +109,7 @@ class Parser:
                     print('Command Accepted')
         else:
             self.__addError('RW_SUPERIOR | RW_INFERIOR',token.type)
-                
+
     def __SEASON(self):
         token = self.__popToken()
         if not token:
@@ -154,51 +154,59 @@ class Parser:
                 self.__addError('LessThan',token.type)
         else:
             self.__addError('RW_TEMPORADA',token.type)
-    
+
     def __FLAGS(self) -> bool:
         token = self.__popToken()
         if token:
             if token.type == 'Flag_f':
-                token = self.__popToken()
-                if not token:
-                    self.__addError('String','EOF')
-                    return False
-                elif token.type == 'String':
-                    return self.__FLAGS()
-                else:
-                    self.__addError('String',token.type)
-                    return False
-            elif token.type == 'Flag_ji':
-                token = self.__popToken()
-                if not token:
-                    self.__addError('Number','EOF')
-                    return False
-                elif token.type == 'Number':
-                    return self.__FLAGS()
-                else:
-                    self.__addError('Number',token.type)
-                    return False
-            elif token.type == 'Flag_jf':
-                token = self.__popToken()
-                if not token:
-                    self.__addError('Number','EOF')
-                    return False
-                elif token.type == 'Number':
-                    return self.__FLAGS()
-                else:
-                    self.__addError('Number',token.type)
-                    return False
-            elif token.type == 'Flag_n':
-                token = self.__popToken()
-                if not token:
-                    self.__addError('Number','EOF')
-                    return False
-                elif token.type == 'Number':
-                    return self.__FLAGS()
-                else:
-                    self.__addError('Number',token.type)
-                    return False
+                return self.__FLAGF()
+            if token.type == 'Flag_ji':
+                return self.__FLAGJI()
+            if token.type == 'Flag_jf':
+                return self.__FLAGJF()
+            if token.type == 'Flag_n':
+                return self.__FLAGN()
         return True
+
+    def __FLAGF(self) -> bool:
+        token = self.__popToken()
+        if not token:
+            self.__addError('String','EOF')
+            return False
+        if token.type == 'String':
+            return self.__FLAGS()
+        self.__addError('String',token.type)
+        return False
+
+    def __FLAGJI(self) -> bool:
+        token = self.__popToken()
+        if not token:
+            self.__addError('Number','EOF')
+            return False
+        if token.type == 'Number':
+            return self.__FLAGS()
+        self.__addError('Number',token.type)
+        return False
+
+    def __FLAGJF(self) -> bool:
+        token = self.__popToken()
+        if not token:
+            self.__addError('Number','EOF')
+            return False
+        elif token.type == 'Number':
+            return self.__FLAGS()
+        self.__addError('Number',token.type)
+        return False
+
+    def __FLAGN(self) -> bool:
+        token = self.__popToken()
+        if not token:
+            self.__addError('Number','EOF')
+            return False
+        elif token.type == 'Number':
+            return self.__FLAGS()
+        self.__addError('Number',token.type)
+        return False
 
     def analyze(self,tokens):
         self.__tokens = tokens
