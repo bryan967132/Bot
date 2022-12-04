@@ -107,7 +107,25 @@ class Chat(tk.Canvas):
         self.pack(fill = 'both',expand = True)
 
     def sendMessage(self):
-        pass
+        message = self.newMessage.get('1.0','end-1c')
+        if message:
+            self.newMessage.delete('1.0','end-1c')
+
+            messageFrame = tk.Frame(self.frameScroll,bg = '#131B21')
+            messageFrame.columnconfigure(0,weight = 1)
+
+            sendedMessage = tk.Label(messageFrame,wraplength = 450,text = message,fg = 'white',bg = '#005C4B',font = 'lucida 9 bold',justify = 'left',anchor = 'e',padx = 5,pady = 5)
+            sendedMessage.grid(row = 0,column = 0,padx = 2,sticky = 'e')
+
+            hour = tk.Label(messageFrame,bg = '#131B21',fg = 'white',text = datetime.now().strftime('%H:%M'),font = 'lucida 7 bold',justify = 'right',anchor = 'e',padx = 5)
+            hour.grid(row = 1,column = 0,padx = 2,sticky = 'e')
+
+            messageFrame.pack(padx = 10,pady = 5,fill = 'x',expand = True,anchor = 'e')
+
+            self.canvas.update_idletasks()
+            self.canvas.yview_moveto(1.0)
+
+            self.getMessage(self.getResponse(message))
 
     def getMessage(self,message):
         messageFrame = tk.Frame(self.frameScroll,bg = '#131B21')
@@ -120,12 +138,16 @@ class Chat(tk.Canvas):
         hora.grid(row = 1,column = 1,padx = 2,sticky = 'w')
 
         messageFrame.pack(padx = 10,pady = 5,fill = 'x',expand = True,anchor = 'e')
+        
         self.canvas.update_idletasks()
         self.canvas.yview_moveto(1.0)
 
         if message == 'ADIOS':
             time.sleep(2)
             quit()
+
+    def getResponse(self,command) -> str:
+        pass
 
     def start(self):
         pass
