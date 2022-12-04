@@ -6,11 +6,10 @@ class Parser:
     def __reset(self):
         self.__command = {}
         self.__flags = {}
-        self.__response = {}
+        self.__response = None
     
     def __addError(self,expected,obtained):
         self.__errors.append(f'SYNTAX ERROR: It was obtained {obtained}, but it was expected {expected}')
-        print(f'SYNTAX ERROR: It was obtained {obtained}, but it was expected {expected}')
     
     def __popToken(self) -> Token:
         try:
