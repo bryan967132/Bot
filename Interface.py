@@ -123,6 +123,10 @@ class Chat(tk.Canvas):
         self.canvas.update_idletasks()
         self.canvas.yview_moveto(1.0)
 
+        if message == 'ADIOS':
+            time.sleep(2)
+            quit()
+
     def start(self):
         pass
 
