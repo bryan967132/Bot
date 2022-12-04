@@ -109,8 +109,19 @@ class Chat(tk.Canvas):
     def sendMessage(self):
         pass
 
-    def getMessage(self):
-        pass
+    def getMessage(self,message):
+        messageFrame = tk.Frame(self.frameScroll,bg = '#131B21')
+        messageFrame.columnconfigure(1,weight = 1)
+
+        receivedMessage = tk.Label(messageFrame,wraplength = 450,fg = 'white',bg = '#202C33',text = message,font = 'lucida 9 bold',justify = 'left',anchor = 'w',padx = 5,pady = 5)
+        receivedMessage.grid(row = 0,column = 1,padx = 2,sticky = 'w')
+
+        hora = tk.Label(messageFrame,bg = '#131B21',fg = 'white',text = datetime.now().strftime('%H:%M'),font = 'lucida 7 bold',justify = 'left',anchor = 'w',padx = 5)
+        hora.grid(row = 1,column = 1,padx = 2,sticky = 'w')
+
+        messageFrame.pack(padx = 10,pady = 5,fill = 'x',expand = True,anchor = 'e')
+        self.canvas.update_idletasks()
+        self.canvas.yview_moveto(1.0)
 
     def start(self):
         pass
@@ -134,4 +145,4 @@ class Chat(tk.Canvas):
         pass
 
     def welcomeBot(self):
-        pass
+        self.getMessage('Hola soy La Liga Bot\nPregúntame lo que sea de La Liga')
