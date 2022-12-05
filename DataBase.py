@@ -1,5 +1,6 @@
 import csv
 from Match import Match
+from Place import Place
 class DB:
     def __init__(self):
         self.__record = []
@@ -12,163 +13,167 @@ class DB:
         return self.__record
 
 class Request:
-    def __init__(self,db : DB):
+    def __init__(self,db : list):
         self.__db = db
 
     def new(self,response):
-        pass
+        command = response['command']
+        if response['function'] == 'SCORE':
+            return self.__score(command['teamName1'],command['teamName2'],command['season'])
+        elif response['function'] == 'MATCHDAY':
+            flags = response['flags']
+            return self.__matchday(command['matchday'],command['season'],flags['-f'])
+        elif response['function'] == 'GOALS':
+            return self.__goals(command['condition'],command['teamName'],command['season'])
+        elif response['function'] == 'STANDINGS':
+            flags = response['flags']
+            return self.__standings(command['season'],flags['-f'])
+        elif response['function'] == 'MATCHES':
+            flags = response['flags']
+            return self.__matches(command['teamName'],command['season'],flags['f'],flags['-ji'],flags['-jf'])
+        elif response['function'] == 'TOP':
+            flags = response['flags']
+            return self.__top(command['condition'],command['season'],flags['-n'])
 
-    def resultado(self,local,visitante,año1,año2):
-        temporada = año1 + '-' + año2
-        for partido in self.db:
-            if partido.getLocal() == local and partido.getVisitante() == visitante and partido.getTemporada() == temporada:
-                return f'El resultado del partido fue: {partido.getLocal()} {partido.getGolesL()} - {partido.getVisitante()} {partido.getGolesV()}.'
-        return 'No hay resgistro del partido.'
-    
-    def jornada(self,numero,año1,año2,archivo = 'jornada'):
-        archivo += '.html'
-        temporada = año1 + '-' + año2
-        encontradoT = False
-        encontradoJ = False
-        partidos = []
-        for partido in self.db:
-            if partido.getTemporada() == temporada:
-                encontradoT = True
-                if partido.getJornada() == numero:
-                    encontradoJ = True
-                    partidos.append(partido)
-        if not encontradoT:
-            return f'No existe la temporada {temporada} :('
-        if not encontradoJ:
-            return f'No existe la jornada {numero} de la temporada {temporada} :('
-        Reportes().repJornada(archivo,temporada,numero,partidos)
-        return f'Generando archivo de resultados jornada {numero} temporada {temporada}.'
-    
-    def goles(self,condicion,equipo,año1,año2):
-        temporada = año1 + '-' + año2
-        if condicion == 'TOTAL':
-            goles = 0
-            for partido in self.db:
-                if partido.getTemporada() == temporada:
-                    if partido.getLocal() == equipo:
-                        goles += partido.getGolesL()
-                    elif partido.getVisitante() == equipo:
-                        goles += partido.getGolesV()
-            return f'Los goles anotados por el {equipo} en total en la temporada {temporada} fueron {goles}.'
-        elif condicion == 'LOCAL':
-            return self.golesL(equipo,temporada)
-        elif condicion == 'VISITANTE':
-            return self.golesV(equipo,temporada)
-    
-    def golesL(self,equipo,temporada):
-        goles = 0
-        for partido in self.db:
-            if partido.getTemporada() == temporada:
-                if partido.getLocal() == equipo:
-                    goles += partido.getGolesL()
-        return f'Los goles anotados por el {equipo} de local en la temporada {temporada} fueron {goles}.'
+    def __score(self,local,visitor,season):
+        for match in self.__db:
+            if match.getLocal() == local and match.getVisitor() == visitor and match.getSeason() == season:
+                return f'El resultado del partido fue: {match.getLocal()} {match.getGoalsL()} - {match.getVisitor()} {match.getGoalsV()}.'
+        return 'No encontré nada del partido que buscas :('
 
-    def golesV(self,equipo,temporada):
-        goles = 0
-        for partido in self.db:
-            if partido.getTemporada() == temporada:
-                if partido.getVisitante() == equipo:
-                    goles += partido.getGolesV()
-        return f'Los goles anotados por el {equipo} de visitante en la temporada {temporada} fueron {goles}.'
-    
-    def tabla(self,año1,año2,archivo = 'temporada'):
-        archivo += '.html'
-        temporada = año1 + '-' + año2
-        tabla = self.simularTemporada(temporada)
-        if len(tabla) == 0:
-            return f'No hay partidos de la temporada {temporada}.'
-        Reportes().repTabla(archivo,temporada,tabla)
-        return f'Generando archivo de clasificación de temporada {temporada}.'
+    def __matchday(self,number,season,file):
+        file += '.html'
+        foundT = False
+        foundJ = False
+        matches = []
+        for match in self.__db:
+            if match.getSeason() == season:
+                foundT = True
+                if match.getMatchday() == number:
+                    foundJ = True
+                    matches.append(match)
+        if not foundT:
+            return f'No encontré la temporada {season} :('
+        if not foundJ:
+            return f'No encontré la jornada {number} de la temporada {season} :('
+        # Report
+        return f'Estoy generando un archivo de resultados de la jornada {number} temporada {season} :)'
 
-    def simularTemporada(self,temporada):
-        tabla = []
-        for partido in self.db:
-            if partido.getTemporada() == temporada:
-                if partido.getJornada() == 1:
-                    tabla.append(Posicion(partido.getLocal(),0,0,0,0,0,0))
-                    tabla.append(Posicion(partido.getVisitante(),0,0,0,0,0,0))
-                elif partido.getJornada() == 2:
+    def __goals(self,condition,team,season):
+        if condition == 'TOTAL':
+            return f'Los goles anotados por el {team} en total en la temporada {season} fueron {self.__goalsL(team,season) + self.__goalsV(team,season)}.'
+        elif condition == 'LOCAL':
+            return f'Los goles anotados por el {team} de local en la temporada {season} fueron {self.__goalsL(team,season)}'
+        elif condition == 'VISITANTE':
+            return f'Los goles anotados por el {team} de local en la temporada {season} fueron {self.__goalsV(team,season)}'
+
+    def __goalsL(self,team,season):
+        goals = 0
+        for match in self.__db:
+            if match.getSeason() == season:
+                if match.getLocal() == team:
+                    goals += match.getGoalsL()
+        return goals
+
+    def __goalsV(self,team,season):
+        goals = 0
+        for match in self.__db:
+            if match.getSeason() == season:
+                if match.getVisitor() == team:
+                    goals += match.getGoalsV()
+        return goals
+
+    def __standings(self,season,file):
+        file += '.html'
+        standings = self.__simulateSeason(season)
+        if len(standings) == 0:
+            return f'No encontré partidos de la temporada {season} :('
+        # Report
+        return f'Estoy generando un archivo de clasificación de la temporada {season} :)'
+
+    def __simulateSeason(self,season):
+        standings = []
+        for match in self.__db:
+            if match.getSeason() == season:
+                if match.getMatchday() == 1:
+                    standings.append(Place(match.getLocal(),0,0,0,0,0,0))
+                    standings.append(Place(match.getVisitor(),0,0,0,0,0,0))
+                elif match.getMatchday() == 2:
                     break
-        
-        for posicion in tabla:
-            for partido in self.db:
-                if partido.getTemporada() == temporada:
-                    if partido.getLocal() == posicion.getEquipo():
-                        if partido.getGolesL() > partido.getGolesV():
-                            posicion.setPG(posicion.getPG() + 1)
-                            posicion.setPuntos(posicion.getPuntos() + 3)
-                        elif partido.getGolesL() == partido.getGolesV():
-                            posicion.setPE(posicion.getPE() + 1)
-                            posicion.setPuntos(posicion.getPuntos() + 1)
-                        elif partido.getGolesL() < partido.getGolesV():
-                            posicion.setPP(posicion.getPP() + 1)
-                        posicion.setGF(posicion.getGF() + partido.getGolesL())
-                        posicion.setGC(posicion.getGC() + partido.getGolesV())
-                    elif partido.getVisitante() == posicion.getEquipo():
-                        if partido.getGolesL() < partido.getGolesV():
-                            posicion.setPG(posicion.getPG() + 1)
-                            posicion.setPuntos(posicion.getPuntos() + 3)
-                        elif partido.getGolesL() == partido.getGolesV():
-                            posicion.setPE(posicion.getPE() + 1)
-                            posicion.setPuntos(posicion.getPuntos() + 1)
-                        elif partido.getGolesL() > partido.getGolesV():
-                            posicion.setPP(posicion.getPP() + 1)
-                        posicion.setGF(posicion.getGF() + partido.getGolesV())
-                        posicion.setGC(posicion.getGC() + partido.getGolesL())
-        
-        for i in range(len(tabla) - 1):
-            for j in range(len(tabla) - i - 1):
-                if tabla[j].getPuntos() < tabla[j + 1].getPuntos():
-                    tabla[j],tabla[j + 1] = tabla[j + 1],tabla[j]
-                elif tabla[j].getPuntos() == tabla[j + 1].getPuntos():
-                    golesActual = tabla[j].getGF() - tabla[j].getGC()
-                    golesSiguiente = tabla[j + 1].getGF() - tabla[j + 1].getGC()
-                    if golesActual < golesSiguiente:
-                        tabla[j],tabla[j + 1] = tabla[j + 1],tabla[j]
 
-        return tabla
+        for place in standings:
+            for match in self.__db:
+                if match.getSeason() == season:
+                    if match.getLocal() == place.getTeam():
+                        if match.getGoalsL() > match.getGoalsV():
+                            place.setPG(place.getPG() + 1)
+                            place.setPuntos(place.getPoints() + 3)
+                        elif match.getGoalsL() == match.getGoalsV():
+                            place.setPE(place.getPE() + 1)
+                            place.setPuntos(place.getPoints() + 1)
+                        elif match.getGoalsL() < match.getGoalsV():
+                            place.setPP(place.getPP() + 1)
+                        place.setGF(place.getGF() + match.getGoalsL())
+                        place.setGC(place.getGC() + match.getGoalsV())
+                    elif match.getVisitante() == place.getTeam():
+                        if match.getGoalsL() < match.getGoalsV():
+                            place.setPG(place.getPG() + 1)
+                            place.setPuntos(place.getPoints() + 3)
+                        elif match.getGoalsL() == match.getGoalsV():
+                            place.setPE(place.getPE() + 1)
+                            place.setPuntos(place.getPoints() + 1)
+                        elif match.getGoalsL() > match.getGoalsV():
+                            place.setPP(place.getPP() + 1)
+                        place.setGF(place.getGF() + match.getGoalsV())
+                        place.setGC(place.getGC() + match.getGoalsL())
 
-    def partidos(self,equipo,año1,año2,archivo = 'partidos',numJi = 1,numJf = 38):
-        archivo += '.html'
-        temporada = año1 + '-' + año2
-        encontradoT = False
-        encontradoE = False
-        partidos = []
-        for partido in self.db:
-            if partido.getTemporada() == temporada:
-                encontradoT = True
-                if partido.getJornada() >= numJi and partido.getJornada() <= numJf:
-                    if partido.getLocal() == equipo:
-                        encontradoE = True
-                        partidos.append(partido)
-                    elif partido.getVisitante() == equipo:
-                        encontradoE = True
-                        partidos.append(partido)
-        if not encontradoT:
-            return f'No existe la temporada {temporada} :('
-        if len(partidos) == 0:
-            return f'No se encontraron partidos del {equipo} de la temporada {temporada} de la jornada {numJi} a la {numJf}.'
-        if not encontradoE:
-            return f'No existe el equipo {equipo} en la temporada {temporada} :('
-        return f'Generando archivo de resultados de la temporada {temporada} del {equipo}.'
+        for i in range(len(standings) - 1):
+            for j in range(len(standings) - i - 1):
+                if standings[j].getPoints() < standings[j + 1].getPoints():
+                    standings[j],standings[j + 1] = standings[j + 1],standings[j]
+                elif standings[j].getPoints() == standings[j + 1].getPoints():
+                    goalsCurrent = standings[j].getGF() - standings[j].getGC()
+                    goalsNext = standings[j + 1].getGF() - standings[j + 1].getGC()
+                    if goalsCurrent < goalsNext:
+                        standings[j],standings[j + 1] = standings[j + 1],standings[j]
+
+        return standings
+
+    def __matches(self,team,season,file,matchdayI,matchdayF):
+        file += '.html'
+        foundT = False
+        foundE = False
+        matches = []
+        for match in self.__db:
+            if match.getSeason() == season:
+                foundT = True
+                if match.getMatchday() >= matchdayI and match.getMatchday() <= matchdayF:
+                    if match.getLocal() == team:
+                        foundE = True
+                        matches.append(match)
+                    elif match.getVisitor() == team:
+                        foundE = True
+                        matches.append(match)
+        if not foundT:
+            return f'No encontré la temporada {season} :('
+        if len(matches) == 0:
+            return f'No encontré partidos del {team} de la temporada {season} de la jornada {matchdayI} a la {matchdayF} :('
+        if not foundE:
+            return f'No encontré al equipo {team} en la temporada {season} :('
+        # Report
+        return f'Estoy generando un archivo de resultados de la temporada {season} del {team} :)'
     
-    def top(self,condicion,año1,año2,top = 5):
-        temporada = año1 + '-' + año2
-        tabla = self.simularTemporada(temporada)
-        if len(tabla) == 0:
-            return f'No hay partidos de la temporada {temporada}.'
-        if condicion == 'SUPERIOR':
+    def __top(self,condition,season,top):
+        standings = self.__simulateSeason(season)
+        if len(standings) == 0:
+            return f'No encontré partidos de la temporada {season} :('
+        if condition == 'SUPERIOR':
             inferior = 0
             superior = top
-        elif condicion == 'INFERIOR':
-            inferior = len(tabla) - top
-            superior = len(tabla)
-        clasificacion = f'Top {top} de la temporada {temporada}'
+        elif condition == 'INFERIOR':
+            inferior = len(standings) - top
+            superior = len(standings)
+        qualifying = f'Este es el Top {top} de la temporada {season}'
         for i in range(inferior,superior):
-            clasificacion += f'\n{i + 1}. {tabla[i].getEquipo()}'
-        return clasificacion
+            qualifying += f'\n{i + 1}. {standings[i].getTeam()}'
+        return qualifying
