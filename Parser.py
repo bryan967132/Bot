@@ -34,7 +34,7 @@ class Parser:
         elif token.type == 'RW_TOP':
             self.__TOP()
         elif token.type == 'RW_ADIOS':
-            print('Command Accepted')
+            self.__response = {'function':'ADIOS','command':'ADIOS'}
         else:
             self.__addError('RW_RESULTADO | RW_JORNADA | RW_GOLES | RW_TABLA | RW_PARTIDOS | RW_TOP | RW_ADIOS',token.type)
 
