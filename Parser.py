@@ -141,7 +141,7 @@ class Parser:
                     self.__addError('Number','EOF')
                 elif token.type == 'Number':
                     if len(token.lexeme) == 4:
-                        self.__command['year1'] = int(token.lexeme)
+                        year = int(token.lexeme)
                         token = self.__popToken()
                         if not token:
                             self.__addError('Hyphen','EOF')
@@ -151,7 +151,7 @@ class Parser:
                                 self.__addError('Number','EOF')
                             elif token.type == 'Number':
                                 if len(token.lexeme) == 4:
-                                    self.__command['year2'] = int(token.lexeme)
+                                    self.__command['season'] = f'{year}-{int(token.lexeme)}'
                                     token = self.__popToken()
                                     if not token:
                                         self.__addError('MoreThan','EOF')
