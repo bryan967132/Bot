@@ -34,6 +34,8 @@ class Request:
         elif response['function'] == 'TOP':
             flags = response['flags']
             return self.__top(command['condition'],command['season'],flags['-n'])
+        elif response['function'] == 'ADIOS':
+            return command
 
     def __score(self,local,visitor,season):
         for match in self.__db:
