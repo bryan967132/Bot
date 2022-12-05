@@ -6,7 +6,7 @@ class Executor:
         self.__lexical = Scanner()
         self.__syntax = Parser()
         self.__db = DB()
-        self.__request = Request(self.__db)
+        self.__request = Request(self.__db.getData())
 
     def getResponse(self,command):
         self.__lexical.analyze(command)
